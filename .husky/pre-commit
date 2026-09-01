@@ -1,0 +1,11 @@
+# Guard the single-workflow rule (plan §1.11): block new files under
+# .github/workflows/ unless CI_WORKFLOW_APPROVED=1 is set for the commit.
+staged_workflows=$(git diff --cached --name-only --diff-filter=A -- '.github/workflows/*')
+
+if [ -n "$staged_workflows" ] && [ "$CI_WORKFLOW_APPROVED" != "1" ]; then
+  echo "✖ New GitHub Actions workflow file(s) staged:"
+  echo "$staged_workflows" | sed 's/^/    /'
+  echo "  plan.md §1.11 allows exactly one workflow (.github/workflows/ci.yml)."
+  echo "  If Anton approved this, re-run with CI_WORKFLOW_APPROVED=1 git commit ..."
+  exit 1
+fi
