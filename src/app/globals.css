@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/*
+ * Minimal foundation styling only. The bespoke "Confianza Local" design system
+ * lands in phase sonnet-1 (plan §6.1) — nothing here should be treated as the
+ * final look.
+ */
+@theme {
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-brand: #0d6d5b;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #f8fafc;
+  color: var(--color-ink);
+}

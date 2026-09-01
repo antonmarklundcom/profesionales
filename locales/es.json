@@ -1,0 +1,52 @@
+{
+  "common": {
+    "brand_tagline": "Describí tu trabajo y recibí hasta 3 presupuestos por WhatsApp.",
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Volver",
+    "continue": "Continuar",
+    "logout": "Cerrar sesión",
+    "error_generic": "Algo salió mal. Probá de nuevo en un momento.",
+    "required_field": "Este campo es obligatorio."
+  },
+  "home": {
+    "title": "Presupuestos de profesionales verificados",
+    "intro": "Contanos qué necesitás y te conectamos con profesionales verificados de tu zona. Gratis y sin registro.",
+    "cta_lead": "Pedir presupuesto",
+    "cta_pro": "Soy profesional"
+  },
+  "auth": {
+    "login_title": "Ingresar",
+    "login_subtitle": "Acceso para profesionales y administradores.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Ingresar",
+    "invalid_credentials": "Correo o contraseña incorrectos.",
+    "account_suspended": "Tu cuenta está suspendida. Escribinos para reactivarla.",
+    "logged_out": "Cerraste sesión.",
+    "must_login": "Iniciá sesión para continuar."
+  },
+  "panel": {
+    "title": "Panel del profesional",
+    "welcome": "Hola, {name}",
+    "credit_balance": "Saldo disponible",
+    "leads_inbox": "Pedidos recibidos",
+    "unverified_notice": "Tu cuenta está en verificación. Vas a recibir pedidos apenas te verifiquemos."
+  },
+  "admin": {
+    "title": "Administración",
+    "professionals": "Profesionales",
+    "leads": "Pedidos",
+    "categories": "Categorías",
+    "zones": "Zonas",
+    "credits": "Créditos",
+    "metrics": "Métricas"
+  },
+  "errors": {
+    "forbidden_title": "No tenés acceso",
+    "forbidden_body": "Esta sección es solo para administradores.",
+    "not_found_title": "Página no encontrada",
+    "not_found_body": "El enlace que seguiste no existe o ya venció."
+  }
+}
