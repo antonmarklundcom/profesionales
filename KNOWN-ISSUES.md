@@ -12,6 +12,11 @@ why it was not fixed now, and which phase should pick it up.
   is missing — recorded only because the prompt asks that skill substitutions be
   logged.
 
+- **No rate limiting on `POST /api/auth/login`** (opus-1). Password guessing is
+  currently bounded only by bcrypt cost. opus-2 introduces rate limiting for the
+  public lead form (plan §5.2) — apply the same limiter to the login route when
+  it exists rather than building a second mechanism now.
+
 - **No password-reset flow** (opus-1). Professionals who forget their password
   need an admin to reset it. The admin credit/user screens land in opus-3; a
   "reset password" action belongs there. Not blocking: pros are onboarded by

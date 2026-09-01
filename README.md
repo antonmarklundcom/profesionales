@@ -92,6 +92,8 @@ tests/              unit tests (ledger math, helpers, auth, role guards)
 - **The schema is complete and frozen.** Every table the whole build needs already
   exists (plan §2). Adding a table or column is a stop-and-ask, not a routine change.
 - **All money is guaraníes as whole integers.** No decimals, no floats anywhere.
+  Ratings follow the same rule: `professionals.avg_rating_x100` is the average scaled
+  by 100 (450 = 4.50 stars).
 - **`credit_transactions` is the authority on balance.** `professionals.credit_balance_gs`
   is a cache written in the same transaction. Only `src/lib/credits/ledger.ts` does
   balance math, and every write carries an idempotency key.

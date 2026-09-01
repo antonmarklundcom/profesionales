@@ -362,6 +362,9 @@ confirmation (KNOWN-ISSUES).
 `lead_assignments`, `spoke_tokens`); `src/lib/credits/ledger.ts` — call
 `applyTransaction` with `idempotencyKeyFor("lead_charge", assignmentId)` and
 `requireSufficientBalance: true`, and never do balance math anywhere else;
+`professionals.avg_rating_x100` stores the review average as an integer scaled by 100
+(450 = 4.50 stars) — plan §2 calls the field `avg_rating`; it is the same field, named
+for its storage so no float ever enters the rating math;
 `src/lib/ids.ts` for `publicCode`, `secureToken`, `hashToken` and
 `normalizeParaguayanPhone`; `categories.form_questions` (typed `FormQuestion[]`) already
 carries the per-category intake fields to render; `settings.assignment_expiry_hours`
