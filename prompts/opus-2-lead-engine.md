@@ -17,6 +17,9 @@ Phase rules:
   restyles everything in sonnet-1.
 - Normalize all phone input to +595 e164; reject non-Paraguayan mobiles with a clear
   es-PY message (through i18n).
+- Lead photos (§5.2): validate type/size server-side, store under UPLOADS_DIR, serve
+  through an authorized route handler only — accepted pro or admin; never public,
+  never pre-accept. Test the authorization.
 - Re-runnable; minor issues → KNOWN-ISSUES.md; stop only per §4.4.
 
 Exit: `npm run verify` green including ledger idempotency/concurrency tests, matching

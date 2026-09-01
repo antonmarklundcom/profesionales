@@ -15,6 +15,9 @@ Phase rules:
 - JSON-LD only where truthful — no fake AggregateRating, no invented review counts.
 - Category page copy: unique, useful es-PY content ≥400 words each (orientative price
   ranges clearly marked "orientativo", FAQs, when-to-call guidance). No filler.
+- Price guides per §6.2: ≥10 "¿Cuánto cuesta …?" guides across the 5 categories, ≥500
+  words each, Gs ranges marked "orientativo 2026", FAQPage JSON-LD, in the sitemap,
+  ending in the preselected lead form. These are the SEO weapon — no filler.
 - Imagery: stay inside the Higgsfield budget rules; if MCP or credits are unavailable,
   ship tasteful CSS/SVG placeholders + KNOWN-ISSUES note — never block on images.
 - Legal pages in plain honest Spanish; add "pending lawyer review" to KNOWN-ISSUES.

@@ -56,6 +56,17 @@ Hostinger managed Node.js. Skills: `nodejs-mysql-hostinger-stack`, `nextjs-deplo
 12. **Design:** bespoke, conversion-first per skills `conversion-design`,
     `web-design-system`, `paraguay-local-site` (Mode 3 vertical patterns),
     `seo-web-builds`. Direction: "Confianza Local". No template look.
+13. **Domain-agnostic brand config.** Site name, domain, and customer-facing brand come
+    from env/config (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_BRAND_NAME`), never hardcoded.
+    Reason: a possible two-door setup later (presupuestos.com.py = customer funnel,
+    profesionales.com.py = pro side, same engine). The build targets one deployment;
+    the second door is Backlog. Domain purchase decision is §8, never a build blocker.
+14. **Leads can carry photos.** Optional photo upload (max 3, size-capped, local
+    uploads dir) on the lead form — a qualified lead with photos is worth multiples of
+    a bare form fill. Photos revealed to pros only after accept, like the phone number.
+15. **Speed is instrumented.** Median time-to-first-accept per category is a first-class
+    admin metric (derivable from `lead_assignments.offered_at/accepted_at`) — it backs
+    the future brand promise "3 presupuestos en 1 hora".
 
 ## §2 Roles & object model
 
@@ -76,9 +87,10 @@ columns — a needed change is a stop-and-ask per §4.4):
   Elisa, San Antonio, Mariano Roque Alonso, Areguá, Itauguá) + "Otra zona".
 - `professional_categories`, `professional_zones` — m2m join tables.
 - `leads` — public_code (short, unguessable), category_id, zone_id, description,
-  answers (JSON from form_questions), customer_name, customer_whatsapp,
-  status(`new|matched|closed|spam`), source(`web|spoke|ads|admin`), source_domain,
-  timestamps.
+  answers (JSON from form_questions), photos (JSON array of stored file paths, max 3),
+  customer_name, customer_whatsapp, customer_type(`particular|empresa`, default
+  `particular`), status(`new|matched|closed|spam`), source(`web|spoke|ads|admin`),
+  source_domain, timestamps.
 - `lead_assignments` — lead_id + professional_id (unique pair),
   status(`offered|accepted|declined|expired`), accept_token (unguessable),
   price_gs (snapshot of category price at offer time), offered_at, accepted_at.
@@ -97,19 +109,24 @@ columns — a needed change is a stop-and-ask per §4.4):
 
 ## §3 Feature scope
 
-**Core (this build):** public lead form (no account), matching + assignment engine,
-credit ledger, accept-lead flow with reveal, pro registration/dashboard/profile,
-admin panel (verify pros, moderate leads, prices, credits, metrics), review
-request + display, public SEO pages (home, category, category×zone, pro profiles),
+**Core (this build):** public lead form (no account, optional photos), matching +
+assignment engine, credit ledger, accept-lead flow with reveal, pro
+registration/dashboard/profile, admin panel (verify pros, moderate leads, prices,
+credits, metrics incl. time-to-first-accept), review request + display, public SEO
+pages (home, category, category×zone, pro profiles), price-guide content system,
 spoke API, VenderCRM export, deploy to Hostinger.
 
 **Approved extras:** review follow-up link generation (manual send via wa.me at first);
-lead spam flagging; category-specific intake questions (JSON-driven).
+lead spam flagging; category-specific intake questions (JSON-driven); price guides —
+file-based content collection (`content/guias/*.md`, no DB tables) rendered at
+`/guias/[slug]` ("¿Cuánto cuesta …?" pages), each ending in the lead form with category
+preselected. Structure built in sonnet-1, ≥10 seed guides written in sonnet-2.
 
 **Explicitly out (→ §10 Backlog):** online card payments for packs (launch = manual
 transferencia/Tigo Money, admin credits via `bonus`/`purchase` adjustment), WhatsApp
-Cloud API, subscriptions, customer accounts, chat, mobile app, digital-services wing,
-automated review SMS.
+Cloud API, AI WhatsApp intake agent, second-domain customer funnel
+(presupuestos.com.py door), subscriptions, customer accounts, chat, mobile app,
+digital-services wing, automated review SMS.
 
 ## §4 Autonomy protocol
 
@@ -162,7 +179,8 @@ Scaffold + everything later phases must never change.
   test, build) + husky pre-push/pre-commit hooks.
 - Drizzle + mysql2: COMPLETE §2 schema, migrations, `db:push`/`db:migrate` scripts,
   `.env.example` with every var the whole build will need (DATABASE_URL, AUTH_SECRET,
-  SMTP_*, VENDERCRM_API_URL/KEY, NEXT_PUBLIC_SITE_URL, SPOKE seed token).
+  SMTP_*, VENDERCRM_API_URL/KEY, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_BRAND_NAME,
+  UPLOADS_DIR, SPOKE seed token). Brand/domain never hardcoded (§1.13).
 - Auth: credentials login (bcrypt), session cookie (Auth.js or equivalent light
   implementation), role-gated route groups `/panel` (professional) and `/admin`
   (admin), middleware guards, seeded admin user from env (`ADMIN_EMAIL`/`ADMIN_PASSWORD`,
@@ -179,8 +197,12 @@ Scaffold + everything later phases must never change.
 ### §5.2 opus-2-lead-engine
 The product. Server logic only — minimal unstyled UI is fine; Sonnet styles later.
 - Public lead intake: `POST /api/leads` + minimal form pages — category → dynamic
-  `form_questions` → description → zone → name + WhatsApp. Server-side validation
-  (Paraguayan phone normalization to +595), honeypot + rate limiting, no account.
+  `form_questions` → description + optional photos (max 3; validate type/size
+  server-side; store under an uploads dir served via a route handler, path pattern
+  compatible with Hostinger persistent storage) → zone → name + WhatsApp →
+  particular/empresa toggle. Server-side validation (Paraguayan phone normalization to
+  +595), honeypot + rate limiting, no account. Photos are NEVER exposed on any public
+  or pre-accept surface.
 - Matching engine: on lead creation, select up to `max_pros_per_lead` verified pros in
   category+zone (fallback: category-wide in Gran Asunción), ordered by fewest recent
   assignments (fair rotation). Create `lead_assignments` with snapshot price + tokens.
@@ -192,8 +214,9 @@ The product. Server logic only — minimal unstyled UI is fine; Sonnet styles la
   equals SUM(ledger).
 - Accept flow: `/lead/aceptar/[token]` — auth optional via token but must map to the
   assignment's pro if logged in; on accept: charge, reveal customer name + WhatsApp +
-  full description, `wa.me` deep link with prefilled greeting. Expiry (settings-driven,
-  default 24h) → `expired`.
+  full description + photos, `wa.me` deep link with prefilled greeting. Photo access is
+  authorized per assignment (accepted pro or admin only) — test it. Expiry
+  (settings-driven, default 24h) → `expired`.
 - Notifications abstraction: `notify(pro, event)` interface with email (SMTP, no-op if
   unset) + dashboard-inbox implementations. WhatsApp API = future implementation slot.
 - Spoke API: `POST /api/v1/spoke/leads`, Bearer token → `spoke_tokens` (hashed),
@@ -213,7 +236,8 @@ The product. Server logic only — minimal unstyled UI is fine; Sonnet styles la
 - Admin `/admin`: verify/suspend pros; leads table with status/spam moderation + manual
   assignment; category price + max-pros editing; zone management; credit granting
   (purchase/bonus/adjustment with note); spoke token management; dashboard metrics
-  (leads/day, accept rate, revenue Gs, active pros per category).
+  (leads/day, accept rate, median time-to-first-accept per category, revenue Gs,
+  active pros per category).
 - Reviews: admin/pro can generate a review request link (`/opinar/[token]`) to send via
   wa.me; public form rates 1–5 + comment → `pending` → admin publishes → aggregates
   update on professional. Tests: aggregate math, token single-use.
@@ -232,7 +256,9 @@ Hard limits §4.7 apply. Load skills: `conversion-design`, `web-design-system`,
   `/[category]/[zone]` programmatic pages, pro public profiles
   `/profesional/[slug]` (verified badge, reviews, "Pedir presupuesto" → lead form with
   category preselected), cómo-funciona, para-profesionales (recruitment landing → pro
-  registration), gracias/confirmation pages.
+  registration), gracias/confirmation pages, `/guias/[slug]` price-guide template +
+  index (content collection per §3 — template and rendering here; guide copy is
+  sonnet-2's job, ship with 1–2 sample guides).
 - Style the opus-2/3 flows (lead form wizard, accept page, panel, review form) into the
   design system. Logic untouched.
 - Exit: Lighthouse mobile ≥90 performance/SEO on home + one category page (documented
@@ -247,6 +273,12 @@ Load skills: `seo-web-builds`, `higgsfield-web-imagery`, `vendercrm-lead-capture
 - Content: es-PY copy depth for the 5 category pages (precios orientativos ranges,
   FAQs, "cuándo llamar a un profesional"), legal pages (términos, privacidad — plain
   honest text, flag for lawyer review in KNOWN-ISSUES).
+- Price guides: ≥10 "¿Cuánto cuesta …?" guides across the 5 launch categories
+  (e.g. instalar un aire split, destapar una cañería, cambiar una cerradura, limpieza
+  final de obra, tablero eléctrico), each ≥500 words, Gs ranges clearly marked
+  "orientativo 2026", FAQ block, ending in the preselected lead form. These target the
+  highest-intent SEO queries in the market — treat them as first-class pages (metas,
+  FAQPage JSON-LD, sitemap).
 - Imagery via `higgsfield-web-imagery` within budget; if MCP/credits unavailable,
   ship tasteful CSS/SVG placeholders and note in KNOWN-ISSUES — never block.
 - Verify VenderCRM export wiring end-to-end against `.env.example` contract.
@@ -283,6 +315,12 @@ Load skills: `nextjs-deploy-hostinger`, `nodejs-mysql-hostinger-stack`.
 ## §8 Open business questions (parked — not build work)
 
 1. Exact per-category lead prices at Phase B switch-on (admin-editable; launch at 0).
+1b. Domain strategy: check availability of presupuestos.com.py / servicios.com.py /
+   cotizar.com.py THIS WEEK. If presupuestos is free, buy it — future customer-facing
+   door (§1.13 keeps the build domain-agnostic either way). profesionales.com.py alone
+   also works; don't let this delay anything.
+1c. AI WhatsApp intake agent (photo + qualification bot) — the biggest post-launch
+   differentiator; scope it as its own project once leads flow.
 2. Assignment expiry (24h default) and whether declined leads re-route to a 4th pro.
 3. When category #6+ and zones beyond Gran Asunción open (data-driven).
 4. Tigo Money vs. bank transfer emphasis for packs; card gateway (Bancard) timing.
@@ -295,10 +333,14 @@ log + KNOWN-ISSUES.md only.)
 
 ## §10 Backlog
 
-WhatsApp Cloud API notifications · online pack payments (Bancard) · subscriptions +
-badges · digital-services wing · customer accounts/history · in-platform chat ·
-auto review-request scheduling · spoke-site builds (pozo, gruas, …) mapped to hub
-categories · pro mobile PWA wrapper · GBP integration for pros (`gbp-optimizer` upsell).
+WhatsApp Cloud API notifications · AI WhatsApp intake/qualification agent ·
+presupuestos.com.py customer-funnel door (second deployment, same engine) · online pack
+payments (Bancard) · subscriptions + badges · digital-services wing · customer
+accounts/history · in-platform chat · auto review-request scheduling · spoke-site
+builds (pozo, gruas, …) mapped to hub categories · cross-links from propia.com.py /
+materiales.com.py ("¿Necesitás un profesional para esto?" → spoke API) · guide
+flywheel: refresh price guides from real platform job data · pro mobile PWA wrapper ·
+GBP integration for pros (`gbp-optimizer` upsell).
 
 ## §11 Business playbook (reference for Anton — sessions don't build this)
 
@@ -316,7 +358,18 @@ categories · pro mobile PWA wrapper · GBP integration for pros (`gbp-optimizer
   customer-pro transaction.
 - **Phase C upsells:** monthly plans, profile badges, priority ranking; cross-sell
   VenderCRM subscriptions, GBP optimization, website builds to paying pros.
-- **KPIs:** leads/week, match rate, accept rate <30 min, pro 30-day retention,
-  Gs revenue/category, review count.
+- **B2B demand cheat code:** administradores de edificios, inmobiliarias, consorcios
+  post jobs weekly — ten of them equal hundreds of consumer visitors and give pros a
+  reason to stay funded. The `empresa` lead flag exists for this; go recruit them
+  early with a direct pitch.
+- **Speed promise:** once median time-to-first-accept is reliably under an hour in a
+  category, advertise it ("3 presupuestos en 1 hora o te llamamos nosotros") — the
+  admin metric from §5.3 is the evidence.
+- **Ceiling honesty:** standalone this is a Gs 30–150M/month business at maturity; the
+  real return is the ecosystem funnel (VenderCRM, GBP packages, site builds to every
+  paying pro) plus demand data nobody else in Paraguay has.
+- **KPIs:** leads/week, match rate, accept rate <30 min, median time-to-first-accept,
+  pro 30-day retention, Gs revenue/category, review count, guide-page → lead
+  conversion.
 - **Main risk:** supply recruitment is grinding sales work — the site is the easy part.
   Do not open category #6 until all 5 have paying (or reliably responsive) pros.

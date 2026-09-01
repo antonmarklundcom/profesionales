@@ -21,7 +21,8 @@ Phase rules:
 - Re-runnable; minor issues → KNOWN-ISSUES.md; stop only per §4.4.
 
 Exit: home, 5 category pages, category×zone pages, pro profiles, cómo-funciona,
-para-profesionales all styled and responsive; Lighthouse mobile ≥90 performance and SEO
+para-profesionales, and the `/guias/[slug]` price-guide template + index (with 1–2
+sample guides) all styled and responsive; Lighthouse mobile ≥90 performance and SEO
 on home + one category page (numbers in build log); zero hardcoded UI strings;
 `npm run verify` green; CI green; PR merged.
 
