@@ -5,8 +5,10 @@ Offerta-style lead marketplace for local services in Paraguay. A customer posts 
 per lead through a credit ledger. WhatsApp-first, web-only, no customer accounts.
 
 The full product decisions live in [`plan.md`](./plan.md); phase prompts live in
-[`prompts/`](./prompts). Read those before changing anything structural — the schema in
-particular is fixed for the whole build (plan §2).
+[`prompts/`](./prompts); per-phase build logs in [`docs/log/`](./docs/log); the
+2026-09-11 review with its locked decisions in
+[`docs/review-2026-09-11.md`](./docs/review-2026-09-11.md). Read those before changing
+anything structural — the schema in particular is fixed for the whole build (plan §2).
 
 **Stack:** Next.js 15 (App Router) + TypeScript + Drizzle ORM + MySQL, deployed on
 Hostinger managed Node.js hosting (`output: "standalone"`).
