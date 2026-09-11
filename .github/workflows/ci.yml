@@ -2,12 +2,10 @@
 # Anton's explicit yes — the pre-commit hook blocks new ones by default.
 name: CI
 
+# No paths-ignore: `check` is a required status for auto-merge, and a required
+# check that never reports leaves docs-only PRs stuck forever (review 2026-09-11 P2).
 on:
   pull_request:
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - "prompts/**"
 
 concurrency:
   group: ci-${{ github.ref }}

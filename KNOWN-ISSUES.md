@@ -12,6 +12,12 @@ why it was not fixed now, and which phase should pick it up.
   is missing — recorded only because the prompt asks that skill substitutions be
   logged.
 
+- **Review 2026-09-11 findings F1–F8** (`docs/review-2026-09-11.md` §2) — suspended
+  users keep their session, default admin password accepted in production, no DB
+  integration tests, non-transactional `recomputeBalance`, health endpoint leaks error
+  detail, domain literals in `src/`, admins locked out of `/panel`. Assigned to opus-2
+  (F1–F7) and opus-3 (F8); tracked there, not here.
+
 - **No rate limiting on `POST /api/auth/login`** (opus-1). Password guessing is
   currently bounded only by bcrypt cost. opus-2 introduces rate limiting for the
   public lead form (plan §5.2) — apply the same limiter to the login route when

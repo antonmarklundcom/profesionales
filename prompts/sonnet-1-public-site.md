@@ -1,36 +1,33 @@
-# Phase sonnet-1 — Public site & design. Paste into a fresh SONNET session, ONLY after phase opus-3 is merged.
+# Phase sonnet-1 — Design system + public pages. SONNET session. Lane 2, parallel with sonnet-2/3/4.
 
-Read `plan.md` FIRST, in full — plus §9 build log and `KNOWN-ISSUES.md`. Execute plan
-§6.1 under the autonomy protocol §4. Build nothing outside the plan.
+Read ONLY: this file, `plan.md` §1, §4, §6 intro, §6.1, the phase table and §9 index,
+`docs/decisions-needed.md`, `docs/log/opus-2.md`, `docs/log/opus-3.md`. Do not read the
+rest. Execute under the autonomy protocol §4. Build nothing outside the plan.
 
-HARD LIMITS (§4.7): no schema, auth, credit-ledger, or matching-logic changes. Data
-access only through the query layer Opus built. Needed change ⇒ workaround + §10 note.
+Owns: the sonnet-1 row of the phase table, plus §4.9 append-only exceptions.
+HARD LIMITS (§4.7): no schema, auth, ledger, matching, upload or notification logic
+changes; data only through `src/lib/**` query modules. Needed change ⇒ workaround + §10 note.
+
+Budget: one session, ≤ 90 min. When the exit criteria pass, open the PR that turn (§4.13).
 
 Phase rules:
-- Branch `phase/sonnet-1` off latest main. Previous phase unmerged ⇒ finish it first.
-- Load skills at the matching step: `conversion-design` (Confianza Local direction),
-  `web-design-system` (tokens, motion, QA gate), `paraguay-local-site` (market
-  patterns), `seo-web-builds` (structure + anti-fabrication). If a named skill is
-  missing, use the nearest equivalent, note it in the build log, keep going — never stop.
-- Mobile-first: most traffic is mobile Meta ads. The home hero IS the lead form entry.
-- NO fabricated trust signals — no invented counts, testimonials, or logos. Real
-  mechanisms only (verification badge, "gratis y sin registro").
-- Restyle the existing lead-form wizard, accept page, panel, and review form into the
-  design system without touching their logic or route contracts.
-- Every string through the i18n layer; es-PY "vos" register.
-- Re-runnable; minor issues → KNOWN-ISSUES.md; stop only per §4.4.
+- Any branch name; PR title `Phase sonnet-1: public site`. Arm auto-merge on open.
+- Skills: `nextjs-national-lead-gen` (pattern menu, conversion patterns),
+  `paraguay-business-apps`. Missing skill → nearest equivalent, note it, keep going.
+- Mobile-first; the home hero IS the lead-form entry. NO fabricated trust signals.
+- Content is data: write `content/README.md` documenting the frontmatter key shape for
+  `content/categories/*.md` and `content/guias/*.md`, put ONE sample of each in
+  `content/_samples/`, and build loaders in `src/lib/content/**`. sonnet-2 writes the
+  real files to that shape; sonnet-5 swaps them in. Do not write real copy yourself.
+- Restyle the opus-2/3 flows: presentation only, route contracts and logic untouched.
+- Every string through i18n, es-PY "vos".
+- Re-runnable; minor issues → `docs/log/sonnet-1.md`; stop only per §4.4.
 
-Exit: home, 5 category pages, category×zone pages, pro profiles, cómo-funciona,
-para-profesionales, and the `/guias/[slug]` price-guide template + index (with 1–2
-sample guides) all styled and responsive; Lighthouse mobile ≥90 performance and SEO
-on home + one category page (numbers in build log); zero hardcoded UI strings;
-`npm run verify` green; CI green; PR merged.
+Exit: home, `/[category]`, `/[category]/[zone]`, `/profesional/[slug]`, `/como-funciona`,
+`/para-profesionales`, `/gracias`, `/guias` + `/guias/[slug]` render with the samples and
+are responsive at 390 px and 1280 px; opus flows restyled; Lighthouse mobile ≥ 90
+performance + SEO on home and one category page (numbers in the log); zero hardcoded UI
+strings; `npm run verify` green; CI green; PR merged.
 
-## After this phase — hand off to the next (fresh session)
-Follow §4.9 exactly: verify the merge via `mcp__github__*`, pass the exit checklist, run
-the pre-handoff audit, commit the §9 build-log entry. Then spawn a NEW session via
-claude-code-remote `create_session` — inherit environment + permission mode (never
-`plan`), model **Sonnet** (never Fable), prompt exactly:
-`Read prompts/sonnet-2-seo-content.md in this repo and execute it.` End with the phase
-report. If `create_session` is unavailable, continue in this window (same model). Never
-hand off on an unverified or stalled merge — report per §4.11 instead.
+## After this phase
+Follow `prompts/_handoff.md`. Spawn nothing.
