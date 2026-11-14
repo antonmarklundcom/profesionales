@@ -7,6 +7,26 @@ function optional(name: string): string | undefined {
   return v && v.length > 0 ? v : undefined;
 }
 
+/** Public dev-only fallbacks. They must never be used (or accepted) in a production runtime. */
+export const DEV_AUTH_SECRET = "dev-only-insecure-secret-change-me";
+export const DEV_ADMIN_PASSWORD = "cambiar-esta-clave";
+
+/**
+ * True when the server is running in production — but not while `next build`
+ * runs (NODE_ENV is "production" there too), so builds without secrets still work.
+ */
+export function isProductionRuntime(): boolean {
+  return (
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PHASE !== "phase-production-build"
+  );
+}
+
+/** Like required(), but the dev fallback is never returned in a production runtime. */
+function requiredSecret(name: string, devFallback: string): string {
+  return required(name, isProductionRuntime() ? undefined : devFallback);
+}
+
 function required(name: string, fallback?: string): string {
   const v = optional(name);
   if (v) return v;
@@ -20,14 +40,14 @@ export const env = {
   },
   get authSecret() {
     // Dev fallback keeps `next build` and local runs working without a .env;
-    // production boots refuse to start on the fallback (see assertProductionEnv).
-    return required("AUTH_SECRET", "dev-only-insecure-secret-change-me");
+    // a production runtime throws instead of using it (see isProductionRuntime).
+    return requiredSecret("AUTH_SECRET", DEV_AUTH_SECRET);
   },
   get adminEmail() {
     return required("ADMIN_EMAIL", "admin@profesionales.com.py");
   },
   get adminPassword() {
-    return required("ADMIN_PASSWORD", "cambiar-esta-clave");
+    return requiredSecret("ADMIN_PASSWORD", DEV_ADMIN_PASSWORD);
   },
   get uploadsDir() {
     return required("UPLOADS_DIR", "./uploads");
@@ -62,6 +82,9 @@ export function assertProductionEnv(): string[] {
   const problems: string[] = [];
   if (!process.env.DATABASE_URL) problems.push("DATABASE_URL is not set");
   if (!process.env.AUTH_SECRET) problems.push("AUTH_SECRET is not set (sessions would use the dev fallback)");
+  else if (process.env.AUTH_SECRET === DEV_AUTH_SECRET) problems.push("AUTH_SECRET is the public dev fallback");
+  if (!process.env.ADMIN_PASSWORD) problems.push("ADMIN_PASSWORD is not set");
+  else if (process.env.ADMIN_PASSWORD === DEV_ADMIN_PASSWORD) problems.push("ADMIN_PASSWORD is the public dev fallback");
   if (!process.env.NEXT_PUBLIC_SITE_URL) problems.push("NEXT_PUBLIC_SITE_URL is not set");
   return problems;
 }

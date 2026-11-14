@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   // open redirect into another site.
   const requested = parsed.data.next;
   const safeNext =
-    requested && requested.startsWith("/") && !requested.startsWith("//")
+    requested && requested.startsWith("/") && !requested.startsWith("//") && !requested.startsWith("/\\")
       ? requested
       : user.role === "admin"
         ? "/admin"
